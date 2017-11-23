@@ -1,4 +1,5 @@
 <?php
+use App\Url;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,9 +13,52 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // $url = new App\Url;
+    // $url->url = "http://blabla.com";
+    // $url->shortened = "azert";
+    // $url->save();
+
+    return view('url');
 });
 
 Route::post('/', function() {
-    dd(request('test'));
+
+    // Valider l'url
+
+
+    // Vérifier si l'url existe déjà dans notre table
+    $url = App\Url::where('url', request('url'))->first();
+
+    if($url){
+      // Si l'adresse url existe, on retourne une vue avec la valeur de l'attribut shortened
+      return view('result')->withShortened($url->shortened);
+    }
+
+
+    // Créer une nouvelle short adresse et la retourner
+    $newUrl = App\Url::create([
+      'url' => request('url'),
+      'shortened' => App\Url::getUniqueShortUrl()
+    ]);
+
+    if($newUrl){
+      return view('result')->withShortened($newUrl->shortened);
+    }
+
+});
+
+// Quand on clique sur le lien de la page result.blade.php
+Route::get('/{shortened}', function ($shortened) {
+
+    // On récupère la première entrée de la table Urls ou le champ shortened correspond à la valeur du paramètre $shortened
+    $url = App\Url::whereShortened($shortened)->first();
+
+    // Si il n'y a pas d'entrée
+    if(! $url){
+      // On renvoie sur la page d'accueil
+      return redirect('/');
+    } else {
+      // Sinon, on redirige vers l'url qui correspond à l'adresse url raccourcie
+      return redirect($url->url);
+    }
 });
