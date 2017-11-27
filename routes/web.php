@@ -24,6 +24,12 @@ Route::get('/', function () {
 Route::post('/', function() {
 
     // Valider l'url
+    $data = ['url' => request('url')];
+    $rules = ['url' => 'required | url']; // Liste des validations : Available Validation Rules. Ici on utilise 2 validations, séparées par un pipe.
+
+    $validation = Validator::make($data, $rules);  // On utilise la façade Validator, disponible à la racine, dans le namespace global
+
+    $validation->validate(); // LA méthode validate() nous renvoie à la page précédente si la validation ne passe pas.
 
 
     // Vérifier si l'url existe déjà dans notre table
