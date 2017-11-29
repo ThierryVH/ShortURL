@@ -1,4 +1,5 @@
 <?php
+use App\Url;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,21 +13,58 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // $url = new App\Url;
+    // $url->url = "http://blabla.com";
+    // $url->shortened = "azert";
+    // $url->save();
+
+    return view('url');
 });
 
 Route::post('/', function() {
-    //dd(request('test')); // On affiche la valeur entrée dans l'input quia pour name 'test'
-    //dd(Request::get('test')); Même resultat mais en utilisant les façades
 
-    // Valider URL
+    // Valider l'url
+    $data = ['url' => request('url')];
+    $rules = ['url' => 'required | url']; // Liste des validations : Available Validation Rules. Ici on utilise 2 validations, séparées par un pipe.
 
-    // Vérifier si l'URL a déjà été raccourcie
+    $validation = Validator::make($data, $rules);  // On utilise la façade Validator, disponible à la racine, dans le namespace global
 
-    $url = App\Url::where('url', request('url'))->first(); // On crée un objet $url correspondant à la première entrée de notre table
+    $validation->validate(); // LA méthode validate() nous renvoie à la page précédente si la validation ne passe pas.
+
+
+    // Vérifier si l'url existe déjà dans notre table
+    $url = App\Url::where('url', request('url'))->first();
 
     if($url){
-      return view('result')->with('shortener', $url->shortener );
-      return view('result')->withShortener($url->shortener ); // On obtient le même résultat 
+      // Si l'adresse url existe, on retourne une vue avec la valeur de l'attribut shortened
+      return view('result')->withShortened($url->shortened);
+    }
+
+
+    // Créer une nouvelle short adresse et la retourner
+    $newUrl = App\Url::create([
+      'url' => request('url'),
+      'shortened' => App\Url::getUniqueShortUrl()
+    ]);
+
+    if($newUrl){
+      return view('result')->withShortened($newUrl->shortened);
+    }
+
+});
+
+// Quand on clique sur le lien de la page result.blade.php
+Route::get('/{shortened}', function ($shortened) {
+
+    // On récupère la première entrée de la table Urls ou le champ shortened correspond à la valeur du paramètre $shortened
+    $url = App\Url::whereShortened($shortened)->first();
+
+    // Si il n'y a pas d'entrée
+    if(! $url){
+      // On renvoie sur la page d'accueil
+      return redirect('/');
+    } else {
+      // Sinon, on redirige vers l'url qui correspond à l'adresse url raccourcie
+      return redirect($url->url);
     }
 });
