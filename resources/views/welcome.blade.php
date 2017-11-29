@@ -5,7 +5,7 @@
 
       <form action="" method="post">
         {{ csrf_field() }}
-        <input type="text" name="test" placeholder="entre un message ici">
+        <input type="text" name="url" placeholder="entre une adresse ici">
         <input type="submit" name="shorten" value="Make me shorter">
       </form>
 @endsection

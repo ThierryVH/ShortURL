@@ -16,5 +16,17 @@ Route::get('/', function () {
 });
 
 Route::post('/', function() {
-    dd(request('test'));
+    //dd(request('test')); // On affiche la valeur entrée dans l'input quia pour name 'test'
+    //dd(Request::get('test')); Même resultat mais en utilisant les façades
+
+    // Valider URL
+
+    // Vérifier si l'URL a déjà été raccourcie
+
+    $url = App\Url::where('url', request('url'))->first(); // On crée un objet $url correspondant à la première entrée de notre table
+
+    if($url){
+      return view('result')->with('shortener', $url->shortener );
+      return view('result')->withShortener($url->shortener ); // On obtient le même résultat 
+    }
 });
