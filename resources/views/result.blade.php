@@ -3,7 +3,7 @@
 
 @section('content')
 
-<a href="{{ config('app.url') }}/{{ $shortened }}">
+<a href="{{ $shortened }}">
   {{ config('app.url') }}/{{ $shortened }}
 </a>
 
